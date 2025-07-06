@@ -13,7 +13,10 @@
   "type": "module",
   "dependencies": {
     "@meshsdk/core": "^1.9.0-beta.59",
-    "express": "^5.1.0"
+    "@types/bcrypt": "^5.0.2",
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.1"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.3",

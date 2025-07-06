@@ -1,6 +1,11 @@
 import express, { Request, Response } from "express";
 import * as dotenv from "dotenv";
 import {
+  TransactionMetaData,
+  storeTransactionOnDb,
+  connectToDatabase,
+} from "./db.js";
+import {
   BlockfrostProvider,
   MeshWallet,
   Transaction,
@@ -11,7 +16,10 @@ import {
 
 dotenv.config();
 const app = express();
+app.use(express.json());
 const port = 3000;
+
+connectToDatabase();
 
 //Loading env details
 const block_forest_key = process.env.BLOCK_FOREST_API_KEY as string;
@@ -37,13 +45,8 @@ const wallet = new MeshWallet({
   },
 });
 
-const transaction1: AssetMetadata = {
-  department: "Civil Protection",
-  message: "brought two buses",
-};
-
 async function storeTransactionDetailsOnChain(
-  transactionMetaData: AssetMetadata
+  transactionMetaData: TransactionMetaData
 ) {
   const usedAddress = await wallet.getUsedAddresses();
   const address = usedAddress[0];
@@ -64,18 +67,51 @@ async function storeTransactionDetailsOnChain(
   const signedTx = await wallet.signTx(unsignedTx);
   const txHash = await wallet.submitTx(signedTx); //This is the transaction hash
 
+  // console.log(txHash);
+
   return txHash;
 }
 
-storeTransactionDetailsOnChain(transaction1)
-  .then((transactionHash) => {
-    console.log(transactionHash);
-  })
-  .catch((error) => {
-    console.log(
-      `THERE IS AN ERROR OCCURED WHEN TRY TO STORE THE TRANSACTION DETAILS ON CHAIN ${error}`
-    );
-  });
+app.post("/transactions", (req: Request, res: Response) => {
+  console.log(req.body);
+  const { amount, description, department, date } = req.body;
+
+  const transaction = {
+    amount: amount,
+    description: description,
+    department: department,
+    transaction_date: date,
+  };
+
+  storeTransactionDetailsOnChain(transaction)
+    .then((transactionHash) => {
+      console.log(`Transaction hash ${transactionHash}`);
+
+      const transaction_mint_date = new Date();
+      const data = {
+        ...transaction,
+        id: transactionHash,
+        transaction_mint_date: transaction_mint_date,
+      };
+
+      storeTransactionOnDb(data).then((status) => {
+        if (status) {
+          return res.status(200).send({
+            message: `successfully stored data on mongo db database`,
+            storedData: data,
+          });
+        } else {
+          res.send("data not stored on the db. Try again");
+        }
+      });
+    })
+    .catch((error) => {
+      console.log(`THERE IS AN ERROR IN STORING DATA ON CHAIN ${error}`);
+      res.send({
+        message: `THERE IS AN ERROR IN STORING DATA ON CHAIN ${error}`,
+      });
+    });
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({ message: "Hello, World! Hi wicky" });
@@ -84,12 +120,3 @@ app.get("/", (req: Request, res: Response) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
-// wallet
-//   .getChangeAddress()
-//   .then((address) => {
-//     console.log(address);
-//   })
-//   .catch((error) => {
-//     console.log("ERROR OCCUERED WHILE RETREIVING THE WALLET ADRESS {$error}");
-//   });
