@@ -28,8 +28,10 @@ async function getMetadataFromTxHash(txhash: string) {
       },
     });
 
+    const jsonData = JSON.parse(JSON.stringify(response.data));
+
     // Return the data from the response
-    return response.data;
+    return jsonData;
   } catch (error) {
     console.error(`ERROR FETCHING DATA FROM CARDARNOSCAN`);
     throw error; // Rethrow or handle the error as needed
@@ -80,13 +82,23 @@ async function storeTransactionDetailsOnChain(
 async function verifyTransaction(document: DataToGenerateHash, txHash: string) {
   const dataOnChain = await getMetadataFromTxHash(txHash);
 
-  console.log(dataOnChain);
+  // console.log(
+  //   dataOnChain[0].json_metadata
+  //     .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GoveTraceToken
+  //     .hash
+  // );
 
-  // const hashOnchain = dataOnChain.GoveTraceToken.hash;
-  // const hashGeneratedUsingDb = getHashForData(document);
+  const hashOnchain =
+    dataOnChain[0].json_metadata
+      .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GoveTraceToken
+      .hash;
 
-  // console.log("hash on chain = " + hashOnchain);
-  // console.log("hash using data = " + hashGeneratedUsingDb);
+  const hashGeneratedUsingDb = getHashForData(document);
+
+  console.log("hash on chain = " + hashOnchain);
+  console.log("hash using data = " + hashGeneratedUsingDb);
+
+  return hashOnchain === hashGeneratedUsingDb;
 }
 
 export { storeTransactionDetailsOnChain, getHashForData, verifyTransaction };

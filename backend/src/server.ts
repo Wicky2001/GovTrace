@@ -116,7 +116,25 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
 
     console.log(dataToGenerateHash);
 
-    const verifyStatus = verifyTransaction(dataToGenerateHash, txhash);
+    const verifyStatus = await verifyTransaction(dataToGenerateHash, txhash);
+
+    if (verifyStatus) {
+      res
+        .status(200)
+        .send({
+          verifyStatus: verifyStatus,
+          message: "Transaction is authentic",
+        });
+    } else {
+      res
+        .status(200)
+        .send({
+          verifyStatus: verifyStatus,
+          message: "Transaction is tampered",
+        });
+    }
+
+    console.log(verifyStatus);
   } catch (error) {
     console.log(
       `ERROR OCUURED WHEN FETCHING DOCUMENT FROM DATABASE USING TXHASH ${error} `
