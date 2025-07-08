@@ -5,6 +5,7 @@ import {
   storeTransactionOnDb,
   connectToDatabase,
   getDocumentUsingTxHash,
+  getAllTransactions,
 } from "./db.js";
 import {
   storeTransactionDetailsOnChain,
@@ -42,7 +43,7 @@ const wallet = new MeshWallet({
   },
 });
 
-app.post("/transactions", async (req: Request, res: Response) => {
+app.post("/api/transactions", async (req: Request, res: Response) => {
   const data = req.body;
 
   console.log(data);
@@ -139,6 +140,30 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
     console.log(
       `ERROR OCUURED WHEN FETCHING DOCUMENT FROM DATABASE USING TXHASH ${error} `
     );
+  }
+});
+
+app.get("/api/transactions", async (req: Request, res: Response) => {
+  try {
+    const transactions = await getAllTransactions();
+
+    if (transactions && transactions.length > 0) {
+      res.status(200).send({
+        message: "Successfully retrieved all transactions",
+        transactions: transactions,
+      });
+    } else {
+      res.status(200).send({
+        message: "No transactions found",
+        transactions: [],
+      });
+    }
+  } catch (error) {
+    console.log(`ERROR OCCURRED WHEN FETCHING ALL TRANSACTIONS: ${error}`);
+    res.status(500).send({
+      message: "Error occurred while fetching transactions",
+      error: error,
+    });
   }
 });
 

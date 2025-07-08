@@ -59,10 +59,21 @@ async function storeTransactionOnDb(data: transactionDataOnMongoDb) {
   }
 }
 
+async function getAllTransactions() {
+  try {
+    const transactions = await Transaction.find({});
+    return transactions;
+  } catch (error) {
+    console.log(`ERROR OCCURRED WHEN FETCHING ALL TRANSACTIONS: ${error}`);
+    return null;
+  }
+}
+
 export {
   TransactionMetaData,
   connectToDatabase,
   storeTransactionOnDb,
   getDocumentUsingTxHash,
   transactionDataOnMongoDb,
+  getAllTransactions,
 };
