@@ -14,6 +14,7 @@ interface TransactionMetaData {
   description: String;
   department: String;
   transaction_date: Date;
+  hash: String | Boolean;
 }
 
 async function connectToDatabase(
@@ -38,6 +39,12 @@ const transactionSchema = new mongoose.Schema({
 
 const Transaction = mongoose.model("Transaction", transactionSchema);
 
+async function getDocumentUsingTxHash(txHash: string) {
+  const transactionData = await Transaction.findOne({ id: txHash });
+
+  return transactionData;
+}
+
 async function storeTransactionOnDb(data: transactionDataOnMongoDb) {
   try {
     const transaction = new Transaction(data);
@@ -52,4 +59,10 @@ async function storeTransactionOnDb(data: transactionDataOnMongoDb) {
   }
 }
 
-export { TransactionMetaData, connectToDatabase, storeTransactionOnDb };
+export {
+  TransactionMetaData,
+  connectToDatabase,
+  storeTransactionOnDb,
+  getDocumentUsingTxHash,
+  transactionDataOnMongoDb,
+};

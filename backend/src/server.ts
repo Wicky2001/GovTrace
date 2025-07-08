@@ -4,15 +4,14 @@ import {
   TransactionMetaData,
   storeTransactionOnDb,
   connectToDatabase,
+  getDocumentUsingTxHash,
 } from "./db.js";
 import {
-  BlockfrostProvider,
-  MeshWallet,
-  Transaction,
-  ForgeScript,
-  AssetMetadata,
-  Mint,
-} from "@meshsdk/core";
+  storeTransactionDetailsOnChain,
+  getHashForData,
+  verifyTransaction,
+} from "./support.js";
+import { BlockfrostProvider, MeshWallet } from "@meshsdk/core";
 
 dotenv.config();
 const app = express();
@@ -21,7 +20,6 @@ const port = 3000;
 
 connectToDatabase();
 
-//Loading env details
 const block_forest_key = process.env.BLOCK_FOREST_API_KEY as string;
 const mnemonic = process.env.LACE_MEMONIC?.split(" ") as Array<string>;
 
@@ -34,7 +32,6 @@ if (!mnemonic) {
 
 const provider = new BlockfrostProvider(block_forest_key);
 
-//setting up wallet
 const wallet = new MeshWallet({
   networkId: 0,
   fetcher: provider,
@@ -45,52 +42,34 @@ const wallet = new MeshWallet({
   },
 });
 
-async function storeTransactionDetailsOnChain(
-  transactionMetaData: TransactionMetaData
-) {
-  const usedAddress = await wallet.getUsedAddresses();
-  const address = usedAddress[0];
-  const forgingScript = ForgeScript.withOneSignature(address);
+app.post("/transactions", async (req: Request, res: Response) => {
+  const data = req.body;
 
-  const tx = new Transaction({ initiator: wallet });
+  console.log(data);
 
-  const asset: Mint = {
-    assetName: "GoveTrace 2nd token",
-    assetQuantity: "1",
-    metadata: transactionMetaData,
-    label: "721",
+  const dataHash = getHashForData(data);
+
+  if (!dataHash) {
+    res.send({ message: "ERROR OCCURED WHEN CREATE HASH CODE FOR THE DATA" });
+  }
+
+  const transaction: TransactionMetaData = {
+    amount: data.amount,
+    description: data.description,
+    department: data.department,
+    transaction_date: data.date,
+    hash: dataHash,
   };
 
-  tx.mintAsset(forgingScript, asset);
-
-  const unsignedTx = await tx.build();
-  const signedTx = await wallet.signTx(unsignedTx);
-  const txHash = await wallet.submitTx(signedTx); //This is the transaction hash
-
-  // console.log(txHash);
-
-  return txHash;
-}
-
-app.post("/transactions", (req: Request, res: Response) => {
-  console.log(req.body);
-  const { amount, description, department, date } = req.body;
-
-  const transaction = {
-    amount: amount,
-    description: description,
-    department: department,
-    transaction_date: date,
-  };
-
-  storeTransactionDetailsOnChain(transaction)
-    .then((transactionHash) => {
-      console.log(`Transaction hash ${transactionHash}`);
+  storeTransactionDetailsOnChain(transaction, wallet)
+    .then((blockchainHash) => {
+      console.log(`Transaction hash ${blockchainHash}`);
 
       const transaction_mint_date = new Date();
+
       const data = {
         ...transaction,
-        id: transactionHash,
+        id: blockchainHash,
         transaction_mint_date: transaction_mint_date,
       };
 
@@ -111,6 +90,38 @@ app.post("/transactions", (req: Request, res: Response) => {
         message: `THERE IS AN ERROR IN STORING DATA ON CHAIN ${error}`,
       });
     });
+});
+
+app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
+  const txhash = req.params.txhash;
+
+  console.log(txhash);
+
+  interface DataToGenerateHash {
+    amount: number;
+    description: string;
+    department: string;
+    date: Date;
+  }
+
+  try {
+    const document = await getDocumentUsingTxHash(txhash);
+
+    const dataToGenerateHash = {
+      amount: document?.amount,
+      description: document?.description,
+      department: document?.department,
+      date: document?.transaction_date,
+    };
+
+    console.log(dataToGenerateHash);
+
+    const verifyStatus = verifyTransaction(dataToGenerateHash, txhash);
+  } catch (error) {
+    console.log(
+      `ERROR OCUURED WHEN FETCHING DOCUMENT FROM DATABASE USING TXHASH ${error} `
+    );
+  }
 });
 
 app.get("/", (req: Request, res: Response) => {
