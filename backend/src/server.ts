@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import * as dotenv from "dotenv";
+import cors from "cors";
 import {
   TransactionMetaData,
   storeTransactionOnDb,
@@ -16,8 +17,9 @@ import { BlockfrostProvider, MeshWallet } from "@meshsdk/core";
 
 dotenv.config();
 const app = express();
+app.use(cors());
 app.use(express.json());
-const port = 3000;
+const port = 4000;
 
 connectToDatabase();
 
@@ -120,19 +122,15 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
     const verifyStatus = await verifyTransaction(dataToGenerateHash, txhash);
 
     if (verifyStatus) {
-      res
-        .status(200)
-        .send({
-          verifyStatus: verifyStatus,
-          message: "Transaction is authentic",
-        });
+      res.status(200).send({
+        verifyStatus: verifyStatus,
+        message: "Transaction is authentic",
+      });
     } else {
-      res
-        .status(200)
-        .send({
-          verifyStatus: verifyStatus,
-          message: "Transaction is tampered",
-        });
+      res.status(200).send({
+        verifyStatus: verifyStatus,
+        message: "Transaction is tampered",
+      });
     }
 
     console.log(verifyStatus);
