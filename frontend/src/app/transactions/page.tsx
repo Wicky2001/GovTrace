@@ -149,6 +149,8 @@ export default function TransactionsPage() {
       process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000" //get all transactions
     }/api/verify/${transactionId}`;
 
+    console.log(url);
+
     try {
       // const response = await
       //   fetch(`/api/verify/${transactionHash}`);
@@ -383,7 +385,193 @@ export default function TransactionsPage() {
           <div className="max-w-2xl">
             <h2 className="text-2xl font-semibold mb-6">Add New Transaction</h2>
 
-            <form className="space-y-8">{/* Form Content */}</form>
+            <form className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-white">
+                    Ministry/Department
+                  </label>
+                  <Select>
+                    <SelectTrigger className="h-12 w-full bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-violet-400">
+                      <SelectValue placeholder="Select Ministry" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/10 border-white/10 backdrop-blur-2xl">
+                      <SelectItem
+                        value="health"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Ministry of Health
+                      </SelectItem>
+                      <SelectItem
+                        value="education"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Ministry of Education
+                      </SelectItem>
+                      <SelectItem
+                        value="transport"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Ministry of Transportation
+                      </SelectItem>
+                      <SelectItem
+                        value="defense"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Ministry of Defense
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-white">
+                    Transaction Amount
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Rs. 0.00"
+                    className="py-2 w-full px-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-violet-400"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-white">
+                  Transaction Description
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Enter detailed description of the transaction..."
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-violet-400 resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-white">
+                    Transaction Type
+                  </label>
+                  <Select>
+                    <SelectTrigger className="h-12 w-full bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-violet-400">
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/10 border-white/10 backdrop-blur-2xl">
+                      <SelectItem
+                        value="procurement"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Procurement
+                      </SelectItem>
+                      <SelectItem
+                        value="salary"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Salary Payment
+                      </SelectItem>
+                      <SelectItem
+                        value="infrastructure"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Infrastructure
+                      </SelectItem>
+                      <SelectItem
+                        value="welfare"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Social Welfare
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* <div className="space-y-2">
+                  <label className="block text-sm font-medium text-white">
+                    Priority Level
+                  </label>
+                  <Select>
+                    <SelectTrigger className="h-12 w-full bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-violet-400">
+                      <SelectValue placeholder="Select Priority" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/10 border-white/10 backdrop-blur-2xl">
+                      <SelectItem
+                        value="low"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Low
+                      </SelectItem>
+                      <SelectItem
+                        value="medium"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Medium
+                      </SelectItem>
+                      <SelectItem
+                        value="high"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        High
+                      </SelectItem>
+                      <SelectItem
+                        value="urgent"
+                        className="text-white hover:bg-gray-800"
+                      >
+                        Urgent
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div> */}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-white">
+                  Supporting Documents
+                </label>
+                <div className="border-2 border-dashed border-gray-500/30 rounded-lg p-8 text-center bg-gray-800/20 relative">
+                  <div className="absolute top-3 right-3">
+                    <span className="bg-orange-500/20 text-orange-400 text-xs px-3 py-1 rounded-full font-medium">
+                      Coming Soon
+                    </span>
+                  </div>
+                  <div className="text-gray-500 mb-3 opacity-50">
+                    <svg
+                      className="w-10 h-10 mx-auto mb-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    <span className="text-base font-medium">
+                      Document upload feature
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 opacity-50">
+                    This feature will be available in future updates
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button
+                  variant="default"
+                  className="h-12 flex-1 bg-violet-600 hover:bg-violet-700 text-white cursor-pointer font-medium"
+                >
+                  Submit Transaction
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-12 flex-1 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white cursor-pointer font-medium"
+                >
+                  Save as Draft
+                </Button>
+              </div>
+            </form>
           </div>
         )}
       </div>

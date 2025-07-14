@@ -82,15 +82,16 @@ async function storeTransactionDetailsOnChain(
 async function verifyTransaction(document: DataToGenerateHash, txHash: string) {
   const dataOnChain = await getMetadataFromTxHash(txHash);
 
-  // console.log(
-  //   dataOnChain[0].json_metadata
-  //     .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GoveTraceToken
-  //     .hash
-  // );
+  // console.log(`Data on chain ${dataOnChain[0]}`);
+  console.log(
+    dataOnChain[0].json_metadata
+      .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GovTraceToken
+      .hash
+  );
 
   const hashOnchain =
     dataOnChain[0].json_metadata
-      .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GoveTraceToken
+      .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GovTraceToken
       .hash;
 
   const hashGeneratedUsingDb = getHashForData(document);

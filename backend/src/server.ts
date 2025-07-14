@@ -110,6 +110,8 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
   try {
     const document = await getDocumentUsingTxHash(txhash);
 
+    console.log(`Document ${document}`);
+
     const dataToGenerateHash = {
       amount: document?.amount,
       description: document?.description,
