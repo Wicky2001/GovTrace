@@ -11,6 +11,7 @@ import {
 } from "./db.js";
 import {
   storeTransactionDetailsOnChain,
+  DataToGenerateHash,
   getHashForData,
   verifyTransaction,
 } from "./support.js";
@@ -50,13 +51,11 @@ app.post(
   "/api/transactions",
   fileUpload.single(`document`),
   async (req: Request, res: Response) => {
-    const data = req.body;
-
-    // console.log(data.department);
+    const data = { ...req.body, fileName: req.file?.filename };
 
     // res.send("testing completed");
 
-    const dataHash = getHashForData(data);
+    const dataHash = await getHashForData(data);
 
     if (!dataHash) {
       res.send({ message: "ERROR OCCURED WHEN CREATE HASH CODE FOR THE DATA" });
@@ -67,6 +66,7 @@ app.post(
       description: data.description,
       department: data.department,
       transaction_date: data.date,
+      fileName: data?.fileName,
       hash: dataHash,
     };
 
@@ -107,13 +107,6 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
 
   console.log(txhash);
 
-  interface DataToGenerateHash {
-    amount: number;
-    description: string;
-    department: string;
-    date: Date;
-  }
-
   try {
     const document = await getDocumentUsingTxHash(txhash);
 
@@ -124,6 +117,7 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
       description: document?.description,
       department: document?.department,
       date: document?.transaction_date,
+      fileName: document?.fileName,
     };
 
     console.log(dataToGenerateHash);

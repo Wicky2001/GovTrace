@@ -1,20 +1,22 @@
 import mongoose from "mongoose";
 
 interface transactionDataOnMongoDb {
-  id: String;
+  id: string;
   amount: Number;
-  description: String;
-  department: String;
+  description: string;
+  department: string;
   transaction_date: Date;
   transaction_mint_date: Date;
+  fileName?: string;
 }
 
 interface TransactionMetaData {
-  amount: Number;
-  description: String;
-  department: String;
+  amount: number;
+  description: string;
+  department: string;
   transaction_date: Date;
-  hash: String | Boolean;
+  hash: string | Boolean;
+  fileName?: string;
 }
 
 async function connectToDatabase(
@@ -35,6 +37,7 @@ const transactionSchema = new mongoose.Schema({
   department: { type: String, required: true },
   transaction_date: { type: Date, required: true },
   transaction_mint_date: { type: Date, required: true },
+  fileName: { type: String },
 });
 
 const Transaction = mongoose.model("Transaction", transactionSchema);

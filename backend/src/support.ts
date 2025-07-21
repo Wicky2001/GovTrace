@@ -1,15 +1,16 @@
-import bcrypt from "bcrypt";
 import * as dotenv from "dotenv";
 import { TransactionMetaData, transactionDataOnMongoDb } from "./db.js";
 import { Transaction, ForgeScript, Mint, MeshWallet } from "@meshsdk/core";
 import axios from "axios";
 import crypto from "crypto";
+import fs from "fs/promises";
 
-interface DataToGenerateHash {
+export interface DataToGenerateHash {
   amount?: number;
   description?: string;
   department?: string;
   date?: Date;
+  fileName?: string | null;
 }
 
 dotenv.config();
@@ -33,14 +34,34 @@ async function getMetadataFromTxHash(txhash: string) {
     // Return the data from the response
     return jsonData;
   } catch (error) {
-    console.error(`ERROR FETCHING DATA FROM CARDARNOSCAN`);
-    throw error; // Rethrow or handle the error as needed
+    throw new Error(`ERROR OCCURED IN support.getMetadataFromTxHash${error}`);
   }
 }
 
-function getHashForData(dataObject: DataToGenerateHash) {
+async function readFileAsByteSream(filename?: string | null) {
+  if (!filename) {
+    return null;
+  }
+
   try {
-    const stringyfyObject = JSON.stringify(dataObject);
+    const data = await fs.readFile(`./fileUploads/${filename}`, "utf8");
+
+    return data;
+  } catch (err) {
+    console.error(`ERROR OCCURRED IN support.readFileAsByteSream: ${err}`);
+    throw new Error(`ERROR OCCURRED IN support.readFileAsByteSream`);
+  }
+}
+
+async function getHashForData(dataObject: DataToGenerateHash) {
+  try {
+    const fileData = await readFileAsByteSream(dataObject.fileName);
+    console.log(`fileRead successfully ${fileData?.substring(0, 20)}`);
+
+    const stringyfyObject = JSON.stringify({
+      ...dataObject,
+      fileData: fileData,
+    });
     const hash = crypto
       .createHash("sha256")
       .update(stringyfyObject)
@@ -83,11 +104,11 @@ async function verifyTransaction(document: DataToGenerateHash, txHash: string) {
   const dataOnChain = await getMetadataFromTxHash(txHash);
 
   // console.log(`Data on chain ${dataOnChain[0]}`);
-  console.log(
-    dataOnChain[0].json_metadata
-      .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GovTraceToken
-      .hash
-  );
+  // console.log(
+  //   dataOnChain[0].json_metadata
+  //     .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GovTraceToken
+  //     .hash
+  // );
 
   const hashOnchain =
     dataOnChain[0].json_metadata
