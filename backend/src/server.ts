@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+
 import * as dotenv from "dotenv";
 import cors from "cors";
 import {
@@ -14,7 +15,7 @@ import {
   verifyTransaction,
 } from "./support.js";
 import { BlockfrostProvider, MeshWallet } from "@meshsdk/core";
-
+import { fileUpload } from "./fileUpload.js";
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -45,55 +46,61 @@ const wallet = new MeshWallet({
   },
 });
 
-app.post("/api/transactions", async (req: Request, res: Response) => {
-  const data = req.body;
+app.post(
+  "/api/transactions",
+  fileUpload.single(`document`),
+  async (req: Request, res: Response) => {
+    const data = req.body;
 
-  console.log(data);
+    // console.log(data.department);
 
-  const dataHash = getHashForData(data);
+    // res.send("testing completed");
 
-  if (!dataHash) {
-    res.send({ message: "ERROR OCCURED WHEN CREATE HASH CODE FOR THE DATA" });
+    const dataHash = getHashForData(data);
+
+    if (!dataHash) {
+      res.send({ message: "ERROR OCCURED WHEN CREATE HASH CODE FOR THE DATA" });
+    }
+
+    const transaction: TransactionMetaData = {
+      amount: data.amount,
+      description: data.description,
+      department: data.department,
+      transaction_date: data.date,
+      hash: dataHash,
+    };
+
+    storeTransactionDetailsOnChain(transaction, wallet)
+      .then((blockchainHash) => {
+        console.log(`Transaction hash ${blockchainHash}`);
+
+        const transaction_mint_date = new Date();
+
+        const data = {
+          ...transaction,
+          id: blockchainHash,
+          transaction_mint_date: transaction_mint_date,
+        };
+
+        storeTransactionOnDb(data).then((status) => {
+          if (status) {
+            return res.status(200).send({
+              message: `successfully stored data on mongo db database`,
+              storedData: data,
+            });
+          } else {
+            res.send("data not stored on the db. Try again");
+          }
+        });
+      })
+      .catch((error) => {
+        console.log(`THERE IS AN ERROR IN STORING DATA ON CHAIN ${error}`);
+        res.send({
+          message: `THERE IS AN ERROR IN STORING DATA ON CHAIN ${error}`,
+        });
+      });
   }
-
-  const transaction: TransactionMetaData = {
-    amount: data.amount,
-    description: data.description,
-    department: data.department,
-    transaction_date: data.date,
-    hash: dataHash,
-  };
-
-  storeTransactionDetailsOnChain(transaction, wallet)
-    .then((blockchainHash) => {
-      console.log(`Transaction hash ${blockchainHash}`);
-
-      const transaction_mint_date = new Date();
-
-      const data = {
-        ...transaction,
-        id: blockchainHash,
-        transaction_mint_date: transaction_mint_date,
-      };
-
-      storeTransactionOnDb(data).then((status) => {
-        if (status) {
-          return res.status(200).send({
-            message: `successfully stored data on mongo db database`,
-            storedData: data,
-          });
-        } else {
-          res.send("data not stored on the db. Try again");
-        }
-      });
-    })
-    .catch((error) => {
-      console.log(`THERE IS AN ERROR IN STORING DATA ON CHAIN ${error}`);
-      res.send({
-        message: `THERE IS AN ERROR IN STORING DATA ON CHAIN ${error}`,
-      });
-    });
-});
+);
 
 app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
   const txhash = req.params.txhash;
