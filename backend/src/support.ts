@@ -56,12 +56,14 @@ async function readFileAsByteSream(filename?: string | null) {
 async function getHashForData(dataObject: DataToGenerateHash) {
   try {
     const fileData = await readFileAsByteSream(dataObject.fileName);
-    console.log(`fileRead successfully ${fileData?.substring(0, 20)}`);
+    // console.log(`fileRead successfully ${fileData?.substring(0, 20)}`);
 
     const stringyfyObject = JSON.stringify({
       ...dataObject,
       fileData: fileData,
     });
+
+    console.log(`data for hash = ${stringyfyObject}`);
     const hash = crypto
       .createHash("sha256")
       .update(stringyfyObject)
@@ -115,7 +117,7 @@ async function verifyTransaction(document: DataToGenerateHash, txHash: string) {
       .df77a07ff08e4381108ef8073a7ffa678b2288511e83c4e37378b3d7.GovTraceToken
       .hash;
 
-  const hashGeneratedUsingDb = getHashForData(document);
+  const hashGeneratedUsingDb = await getHashForData(document);
 
   console.log("hash on chain = " + hashOnchain);
   console.log("hash using data = " + hashGeneratedUsingDb);

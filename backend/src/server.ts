@@ -53,9 +53,26 @@ app.post(
   async (req: Request, res: Response) => {
     const data = { ...req.body, fileName: req.file?.filename };
 
+    const date = new Date(data.transaction_date);
+    const amount = Number(data.amount);
+
     // res.send("testing completed");
 
-    const dataHash = await getHashForData(data);
+    const dataToGenerateHash = {
+      amount: amount,
+      description: data.description,
+      department: data.department,
+      transaction_date: date,
+      fileName: data?.fileName,
+    };
+
+    console.log(
+      `DATA TO HASH WHEN SUBMITTING THE REQUEST= ${JSON.stringify(
+        dataToGenerateHash
+      )}`
+    );
+
+    const dataHash = await getHashForData(dataToGenerateHash);
 
     if (!dataHash) {
       res.send({ message: "ERROR OCCURED WHEN CREATE HASH CODE FOR THE DATA" });
@@ -65,8 +82,6 @@ app.post(
       amount: data.amount,
       description: data.description,
       department: data.department,
-      transaction_date: data.date,
-      fileName: data?.fileName,
       hash: dataHash,
     };
 
@@ -77,7 +92,7 @@ app.post(
         const transaction_mint_date = new Date();
 
         const data = {
-          ...transaction,
+          ...dataToGenerateHash,
           id: blockchainHash,
           transaction_mint_date: transaction_mint_date,
         };
@@ -116,11 +131,11 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
       amount: document?.amount,
       description: document?.description,
       department: document?.department,
-      date: document?.transaction_date,
+      transaction_date: document?.transaction_date,
       fileName: document?.fileName,
     };
 
-    console.log(dataToGenerateHash);
+    console.log(`DATA FOR HASH WHEN VERIFYING HASH = ${dataToGenerateHash}`);
 
     const verifyStatus = await verifyTransaction(dataToGenerateHash, txhash);
 
@@ -141,6 +156,8 @@ app.get("/api/verify/:txhash", async (req: Request, res: Response) => {
     console.log(
       `ERROR OCUURED WHEN FETCHING DOCUMENT FROM DATABASE USING TXHASH ${error} `
     );
+
+    res.status(500).send(error);
   }
 });
 

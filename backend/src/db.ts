@@ -14,9 +14,7 @@ interface TransactionMetaData {
   amount: number;
   description: string;
   department: string;
-  transaction_date: Date;
-  hash: string | Boolean;
-  fileName?: string;
+  hash: string | boolean;
 }
 
 async function connectToDatabase(
