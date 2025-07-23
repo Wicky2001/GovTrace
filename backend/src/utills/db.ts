@@ -28,6 +28,45 @@ async function connectToDatabase(
   }
 }
 
+const guestSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, required: true },
+});
+
+const Guest = mongoose.model("Guests", guestSchema);
+
+interface guestData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export const saveGuest = async (data: guestData) => {
+  try {
+    const dataToStore = { ...data, role: "guest" };
+    const guest = new Guest(dataToStore);
+    const result = guest.save();
+
+    return result;
+  } catch (error) {
+    throw new Error(
+      `ERROR OCCUREED IN SAVING GUEST IN src.utills.saveGuest ${error}`
+    );
+  }
+};
+
+const adminSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+
+const Admins = mongoose.model("Admins", adminSchema);
+
 const transactionSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   amount: { type: Number, required: true },

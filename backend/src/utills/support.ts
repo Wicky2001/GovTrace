@@ -125,4 +125,9 @@ async function verifyTransaction(document: DataToGenerateHash, txHash: string) {
   return hashOnchain === hashGeneratedUsingDb;
 }
 
+export const isGovermentEmail = (email: string) => {
+  const govEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(gov|gov\.lk)$/;
+  return govEmailRegex.test(email);
+};
+
 export { storeTransactionDetailsOnChain, getHashForData, verifyTransaction };
