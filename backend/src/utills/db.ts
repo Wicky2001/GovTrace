@@ -1,4 +1,9 @@
-import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+import mongoose, { Document } from "mongoose";
+
+dotenv.config();
+const salt_rounds = Number(process.env.SALT_ROUNDS);
 
 interface transactionDataOnMongoDb {
   id: string;
@@ -28,28 +33,34 @@ async function connectToDatabase(
   }
 }
 
-const guestSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, required: true },
-});
-
-const Guest = mongoose.model("Guests", guestSchema);
-
-interface guestData {
+interface guestData extends Document {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  role?: string;
 }
+
+const guestSchema = new mongoose.Schema<guestData>({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, required: false },
+});
+
+guestSchema.pre<guestData>("save", async function (next) {
+  this.password = await bcrypt.hash(this.password, salt_rounds);
+  next();
+});
+
+export const Guest = mongoose.model("Guests", guestSchema);
 
 export const saveGuest = async (data: guestData) => {
   try {
     const dataToStore = { ...data, role: "guest" };
     const guest = new Guest(dataToStore);
-    const result = guest.save();
+    const result = await guest.save();
 
     return result;
   } catch (error) {
