@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { isGovermentEmail } from "../utills/support.js";
 import { saveGuest, Guest } from "../utills/db.js";
-
+import passport from "../utills/passport.js";
 const authRoute = Router();
 
 authRoute.post("/register/guest", async (req: Request, res: Response) => {
@@ -26,6 +26,27 @@ authRoute.post("/register/guest", async (req: Request, res: Response) => {
       res.status(500).json({ message: error.message });
     }
   }
+});
+
+authRoute.post("/login/guest", (req: Request, res: Response) => {
+  passport.authenticate(
+    "local",
+    { session: false },
+    (err: any, user: any, info: any) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "An error occured during authentication" });
+      }
+      if (!user) {
+        return res
+          .status(401)
+          .json({ message: info?.message || "Authentication failed" });
+      }
+
+      return res.status(200).json({ message: `login successfull` });
+    }
+  )(req, res);
 });
 
 export default authRoute;

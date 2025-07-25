@@ -15,8 +15,6 @@ export interface DataToGenerateHash {
 
 dotenv.config();
 
-const salt_rounds = Number(process.env.SALT);
-const salt = process.env.SALT_ROUNDS as string;
 const block_forest_key = process.env.BLOCK_FOREST_API_KEY as string;
 
 async function getMetadataFromTxHash(txhash: string) {
