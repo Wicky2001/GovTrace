@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const RegisterGuest = () => {
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -104,9 +106,22 @@ const RegisterGuest = () => {
               </div>
               <button
                 type="submit"
-                className="focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:outline-none"
+                className="mb-2 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:outline-none"
               >
                 Create an account
+              </button>
+              <hr className=" my-2 h-px -my-y-4 bg-gray-200  dark:bg-gray-700" />
+              <button
+                type="submit"
+                className="flex gap-1 inline-center justify-center focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:outline-none"
+              >
+                <Image
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google"
+                  width={20}
+                  height={20} // Added margin-right to separate the icon from the text
+                />
+                Continue with Google
               </button>
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
