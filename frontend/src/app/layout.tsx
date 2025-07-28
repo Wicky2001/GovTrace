@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import Footer from "@/components/Footer";
 
@@ -30,14 +30,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            {children}
-            <Footer />
-          </ThemeProvider>
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          {children}
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
