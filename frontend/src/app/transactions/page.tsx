@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Define the Transaction type
 interface Transaction {
@@ -21,86 +22,6 @@ interface Transaction {
   transaction_date: string;
   hash: string;
   transaction_mint_date: string;
-}
-
-interface ApiResponse {
-  message: string;
-  storedData: Transaction[];
-}
-
-// Sample transactions
-const sampleTransactions: Transaction[] = [
-  {
-    id: "sample001",
-    amount: 50000000,
-    description: "Medical Equipment Procurement",
-    department: "Ministry of Health",
-    transaction_date: "2024-01-15T00:00:00.000Z",
-    hash: "0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890",
-    transaction_mint_date: "2024-01-15T10:30:00.000Z",
-  },
-  {
-    id: "sample002",
-    amount: 125000000,
-    description: "School Infrastructure Development",
-    department: "Ministry of Education",
-    transaction_date: "2024-01-14T00:00:00.000Z",
-    hash: "0x2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890ab",
-    transaction_mint_date: "2024-01-14T14:45:00.000Z",
-  },
-  {
-    id: "sample003",
-    amount: 75000000,
-    description: "Road Maintenance Contract",
-    department: "Ministry of Transportation",
-    transaction_date: "2024-01-13T00:00:00.000Z",
-    hash: "0x3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890abcd",
-    transaction_mint_date: "2024-01-13T09:15:00.000Z",
-  },
-];
-
-// Fetch transactions function
-async function fetchTransactions(): Promise<{
-  transactions: Transaction[];
-  error: string | null;
-}> {
-  const url = `${
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000" //get all transactions
-  }/api/transactions`;
-
-  console.log(url);
-
-  try {
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error("Failed to fetch transactions");
-    }
-
-    const data = await response.json();
-    console.log(data);
-    // let transactionData = Array.isArray(data.storedData)
-    //   ? data.storedData
-    //   : [data.storedData];
-    // transactionData = transactionData.filter(
-    //   (t) => t && t.id && t.amount && t.description
-    // );
-
-    const transactionData = data.transactions;
-    console.log(transactionData);
-
-    return transactionData.length === 0
-      ? {
-          transactions: sampleTransactions,
-          error: "No transactions found - showing sample data",
-        }
-      : { transactions: transactionData, error: null };
-  } catch (err) {
-    console.error("Fetch error:", err);
-    return {
-      transactions: sampleTransactions,
-      error: "Error connecting to server - showing sample data",
-    };
-  }
 }
 
 const formatDate = (dateString: string) => {
@@ -116,13 +37,49 @@ const formatAmount = (amount: number) => {
 };
 
 export default function TransactionsPage() {
+  const router = useRouter();
+
+  async function fetchTransactions() {
+    const url = `${
+      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000" //get all transactions
+    }/api/transactions`;
+
+    console.log(url);
+
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (response.status === 404) {
+        router.push("/login/guest");
+        throw new Error("Not authenticated");
+      }
+
+      console.log(response);
+
+      if (!response.ok) {
+        window.location.href = "/error";
+        router.push("/error");
+        throw new Error("Not authenticated");
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      const transactionData: Transaction[] = data.transactions || [];
+      console.log(transactionData);
+
+      return transactionData;
+    } catch (err) {
+      console.error("Fetch error:", err);
+      return [];
+    }
+  }
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     const loadTransactions = async () => {
-      const { transactions, error } = await fetchTransactions();
+      const transactions = await fetchTransactions();
       setTransactions(transactions);
-      setError(error);
     };
 
     loadTransactions();

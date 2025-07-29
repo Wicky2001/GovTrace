@@ -1,9 +1,42 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 interface LoginFormProps {
   formHeading: string;
-  submitUrl?: string;
+  submitUrl: string;
 }
 
-const LoginForm = ({ formHeading }: LoginFormProps) => {
+const LoginForm = ({ formHeading, submitUrl }: LoginFormProps) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(submitUrl, {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      if (!res.ok) {
+        router.push("/login/guest");
+        throw new Error("login faild");
+      } else {
+        router.push("/");
+      }
+    } catch (error) {
+      //   if (error instanceof Error) {
+      //     error.message
+      //   } else {
+      //     setError(`Error occuret when login = ${error}`);
+      //   }
+      console.log(`Error ocuured in guest login form ${error}`);
+    }
+  };
+
   return (
     <div className=" flex items-center min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -20,7 +53,7 @@ const LoginForm = ({ formHeading }: LoginFormProps) => {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form action="#" method="POST" className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
               htmlFor="email"
@@ -34,6 +67,7 @@ const LoginForm = ({ formHeading }: LoginFormProps) => {
                 type="email"
                 name="email"
                 required
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-300 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
@@ -63,6 +97,7 @@ const LoginForm = ({ formHeading }: LoginFormProps) => {
                 type="password"
                 name="password"
                 required
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
