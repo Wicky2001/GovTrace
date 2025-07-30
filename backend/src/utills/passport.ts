@@ -36,8 +36,19 @@ passport.use(
   )
 );
 
+// const opts = {
+//   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+//   secretOrKey: jwtSecret,
+// };
+
 const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: ExtractJwt.fromExtractors([
+    (req) => {
+      console.log("headers:", req.headers);
+      console.log("cookies:", req.cookies); // Log cookies to see what's being sent
+      return req.cookies.accessToken; // Extract accessToken from cookies
+    }, // Assuming the cookie is named "accessToken"
+  ]),
   secretOrKey: jwtSecret,
 };
 

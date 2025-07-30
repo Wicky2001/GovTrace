@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import { fileUpload } from "../utills/fileUpload.js";
+import passport from "../utills/passport.js";
 import {
   storeTransactionDetailsOnChain,
   getHashForData,
@@ -17,6 +18,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const transactionRoute = Router();
+transactionRoute.use(passport.authenticate("jwt", { session: false }));
 
 const block_forest_key = process.env.BLOCK_FOREST_API_KEY as string;
 const mnemonic = process.env.LACE_MEMONIC?.split(" ") as Array<string>;

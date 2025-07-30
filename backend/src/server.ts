@@ -6,12 +6,26 @@ import passport from "./utills/passport.js";
 //Routes
 import transactionRoute from "./routes/transactions.js";
 import authRoute from "./routes/auth.js";
+import cookieParser from "cookie-parser";
+import fs from "fs";
+import https from "https";
 
 const app = express();
 
 app.use(morgan("dev"));
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://localhost:3000", // Your frontend's URL
+    credentials: true, // Allow cookies to be sent with requests
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
+
+const options = {
+  key: fs.readFileSync("./httpsFiles/localhost-key.pem"),
+  cert: fs.readFileSync("./httpsFiles/localhost.pem"),
+};
 
 app.use("/api/transaction", transactionRoute);
 app.use("/api/auth", authRoute);
@@ -28,6 +42,6 @@ app.get(
   }
 );
 
-app.listen(port, () => {
+https.createServer(options, app).listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

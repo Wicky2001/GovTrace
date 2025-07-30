@@ -61,10 +61,19 @@ authRoute.post(
   (req: Request, res: Response) => {
     const email = req.body.email;
 
-    const acceessToken = jwt.sign({ email: email, role: "guest" }, jwtSecret, {
+    const accessToken = jwt.sign({ email: email, role: "guest" }, jwtSecret, {
       expiresIn: "1d",
     });
-    res.status(201).json({ message: `jwt token created`, jwt: acceessToken });
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      domain: "localhost",
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({ message: `jwt token created` });
   }
 );
 

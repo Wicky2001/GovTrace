@@ -40,24 +40,24 @@ export default function TransactionsPage() {
   const router = useRouter();
 
   async function fetchTransactions() {
-    const url = `${
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000" //get all transactions
-    }/api/transactions`;
+    const url = `https://localhost:4000/api/transaction/all`;
 
     console.log(url);
 
     try {
-      const response = await fetch(url, { cache: "no-store" });
-      if (response.status === 404) {
-        router.push("/login/guest");
+      const response = await fetch(url, {
+        cache: "no-store",
+        credentials: "include",
+      });
+
+      // console.log(response);
+      if (response.status === 401) {
+        // router.push("/login/guest");
         throw new Error("Not authenticated");
       }
 
-      console.log(response);
-
       if (!response.ok) {
-        window.location.href = "/error";
-        router.push("/error");
+        // router.push("/error");
         throw new Error("Not authenticated");
       }
 
@@ -69,7 +69,7 @@ export default function TransactionsPage() {
 
       return transactionData;
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.log(`error transaction page${err}`);
       return [];
     }
   }
@@ -85,9 +85,6 @@ export default function TransactionsPage() {
     loadTransactions();
   }, []);
 
-  const [error, setError] = useState<string | null>(
-    "No transactions found - showing sample data"
-  );
   const [verifyingStates, setVerifyingStates] = useState<{
     [key: string]: "idle" | "verifying" | "verified" | "error";
   }>({});
@@ -267,11 +264,6 @@ export default function TransactionsPage() {
             </div>
 
             {/* Error State */}
-            {error && (
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-6 text-center">
-                <p className="text-yellow-400 font-medium">{error}</p>
-              </div>
-            )}
 
             {/* Transactions Table */}
             <div className="bg-white/5 rounded-lg overflow-hidden">

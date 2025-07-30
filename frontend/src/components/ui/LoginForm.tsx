@@ -25,7 +25,7 @@ const LoginForm = ({ formHeading, submitUrl }: LoginFormProps) => {
         router.push("/login/guest");
         throw new Error("login faild");
       } else {
-        router.push("/");
+        router.push("/transactions");
       }
     } catch (error) {
       //   if (error instanceof Error) {
