@@ -32,6 +32,20 @@ const LoginForm = ({ formHeading, submitUrl, guest }: LoginFormProps) => {
       transition: Bounce,
     });
 
+  const loginSuccessAlert = () => {
+    toast.success("LOGGED IN", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!guest) {
@@ -49,6 +63,7 @@ const LoginForm = ({ formHeading, submitUrl, guest }: LoginFormProps) => {
       if (!res.ok) {
         loginFaildAlert(`${responseData.message}`);
       } else {
+        loginSuccessAlert();
         router.push("/transactions");
       }
     } catch (error) {

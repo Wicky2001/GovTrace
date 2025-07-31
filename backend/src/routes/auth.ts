@@ -96,7 +96,23 @@ authRoute.post(
 
 authRoute.post(
   "/login/admin",
-  // passport.authenticate("admin-local", { session: false }),
+  (req, res, next) => {
+    passport.authenticate(
+      "admin-local",
+      { session: false },
+      (err: any, user: any, info: any) => {
+        if (err || !user) {
+          return res
+            .status(401)
+            .json({ message: info.message || "Authentication faild" });
+        }
+
+        req.user = user;
+        next();
+      }
+    )(req, res, next);
+  },
+
   (req: Request, res: Response) => {
     const email = req.body.email;
 

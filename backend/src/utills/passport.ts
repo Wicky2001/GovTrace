@@ -48,10 +48,12 @@ passport.use(
     async function (email, password, done) {
       try {
         console.log("Attempting to authenticate with email:", email);
-        const admin = Admin.findOne({ email: email });
+        const admin = await Admin.findOne({ email: email });
+
+        console.log(admin);
 
         if (!admin) {
-          return done(null, false, { message: "incorrect email" });
+          return done(null, false, { message: "INCORRECT EMAIL" });
         }
 
         return done(null, admin, { message: "admin login complete" });
