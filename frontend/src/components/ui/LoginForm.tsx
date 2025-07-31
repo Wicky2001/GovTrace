@@ -1,19 +1,42 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast, Bounce } from "react-toastify";
 
 interface LoginFormProps {
   formHeading: string;
   submitUrl: string;
+  guest: boolean;
 }
 
-const LoginForm = ({ formHeading, submitUrl }: LoginFormProps) => {
+interface ApiResponse {
+  message: string;
+}
+
+const LoginForm = ({ formHeading, submitUrl, guest }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
+  const loginFaildAlert = (message: string) =>
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!guest) {
+      setPassword("password");
+    }
     try {
       const res = await fetch(submitUrl, {
         method: "POST",
@@ -21,18 +44,14 @@ const LoginForm = ({ formHeading, submitUrl }: LoginFormProps) => {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
+
+      const responseData = (await res.json()) as ApiResponse;
       if (!res.ok) {
-        router.push("/login/guest");
-        throw new Error("login faild");
+        loginFaildAlert(`${responseData.message}`);
       } else {
         router.push("/transactions");
       }
     } catch (error) {
-      //   if (error instanceof Error) {
-      //     error.message
-      //   } else {
-      //     setError(`Error occuret when login = ${error}`);
-      //   }
       console.log(`Error ocuured in guest login form ${error}`);
     }
   };
@@ -74,35 +93,37 @@ const LoginForm = ({ formHeading, submitUrl }: LoginFormProps) => {
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="block text-sm/6 font-medium text-gray-300"
-              >
-                Password
-              </label>
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-semibold text-indigo-500 hover:text-indigo-500"
+          {guest && (
+            <div>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-sm/6 font-medium text-gray-300"
                 >
-                  Forgot password?
-                </a>
+                  Password
+                </label>
+                <div className="text-sm">
+                  <a
+                    href="#"
+                    className="font-semibold text-indigo-500 hover:text-indigo-500"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
+              </div>
+              <div className="mt-2">
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  required
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                />
               </div>
             </div>
-            <div className="mt-2">
-              <input
-                id="password"
-                type="password"
-                name="password"
-                required
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-              />
-            </div>
-          </div>
+          )}
 
           <div>
             <button
@@ -114,15 +135,17 @@ const LoginForm = ({ formHeading, submitUrl }: LoginFormProps) => {
           </div>
         </form>
 
-        <p className="mt-10 text-center text-sm/6 text-gray-500">
-          Not a member?
-          <a
-            href="#"
-            className="font-semibold text-indigo-600 hover:text-indigo-500"
-          >
-            Start a 14 day free trial
-          </a>
-        </p>
+        {guest && (
+          <p className="mt-10 text-center text-sm/6 text-gray-500">
+            Not a member?
+            <Link
+              href="/register"
+              className="font-semibold text-indigo-600 hover:text-indigo-500"
+            >
+              Register
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );

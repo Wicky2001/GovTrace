@@ -1,7 +1,7 @@
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import passport from "passport";
-import { Guest } from "./db.js";
+import { Guest, Admin } from "./db.js";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 
@@ -10,6 +10,7 @@ dotenv.config();
 const jwtSecret = String(process.env.SECRET);
 
 passport.use(
+  "guest-local",
   new LocalStrategy(
     {
       usernameField: "email",
@@ -17,6 +18,7 @@ passport.use(
     },
     async function (email, password, done) {
       try {
+        console.log("guest local passport");
         const guest = await Guest.findOne({ email: email });
 
         if (!guest) {
@@ -29,6 +31,30 @@ passport.use(
         }
 
         return done(null, guest, { message: "Authentication complete" });
+      } catch (err) {
+        return done(err);
+      }
+    }
+  )
+);
+
+passport.use(
+  "admin-local",
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async function (email, password, done) {
+      try {
+        console.log("Attempting to authenticate with email:", email);
+        const admin = Admin.findOne({ email: email });
+
+        if (!admin) {
+          return done(null, false, { message: "incorrect email" });
+        }
+
+        return done(null, admin, { message: "admin login complete" });
       } catch (err) {
         return done(err);
       }

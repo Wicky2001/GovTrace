@@ -76,7 +76,7 @@ const adminSchema = new mongoose.Schema({
   lastName: { type: String },
 });
 
-const Admins = mongoose.model("Admins", adminSchema);
+export const Admin = mongoose.model("Admins", adminSchema);
 
 const transactionSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },

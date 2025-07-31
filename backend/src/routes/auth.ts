@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { isGovermentEmail } from "../utills/support.js";
 import { saveGuest, Guest } from "../utills/db.js";
 import passport from "../utills/passport.js";
@@ -34,33 +34,50 @@ authRoute.post("/register/guest", async (req: Request, res: Response) => {
   }
 });
 
-// authRoute.post("/login/guest", (req: Request, res: Response) => {
-//   passport.authenticate(
-//     "local",
-//     { session: false },
-//     (err: any, user: any, info: any) => {
-//       if (err) {
-//         return res
-//           .status(500)
-//           .json({ message: "An error occured during authentication" });
-//       }
-//       if (!user) {
-//         return res
-//           .status(401)
-//           .json({ message: info?.message || "Authentication failed" });
-//       }
+// authRoute.post(
+//   "/login/guest",
+//   passport.authenticate("guest-local", {
+//     session: false,
+//     failureMessage: true,
+//   }),
+//   (req: Request, res: Response) => {
+//     const email = req.body.email;
 
-//       return res.status(200).json({ message: `login successfull` });
-//     }
-//   )(req, res);
-// });
+//     const accessToken = jwt.sign({ email: email, role: "guest" }, jwtSecret, {
+//       expiresIn: "1d",
+//     });
+
+//     res.cookie("accessToken", accessToken, {
+//       httpOnly: true,
+//       domain: "localhost",
+//       secure: true,
+//       sameSite: "none",
+//       maxAge: 24 * 60 * 60 * 1000,
+//     });
+
+//     res.status(201).json({ message: `guest-jwt token created` });
+//   }
+// );
 
 authRoute.post(
   "/login/guest",
-  passport.authenticate("local", { session: false }),
-  (req: Request, res: Response) => {
+  (req, res, next) => {
+    passport.authenticate(
+      "guest-local",
+      { session: false },
+      (err: any, user: any, info: any) => {
+        if (err || !user) {
+          return res
+            .status(401)
+            .json({ message: info?.message || "Authentication failed" });
+        }
+        req.user = user;
+        next();
+      }
+    )(req, res, next);
+  },
+  (req, res) => {
     const email = req.body.email;
-
     const accessToken = jwt.sign({ email: email, role: "guest" }, jwtSecret, {
       expiresIn: "1d",
     });
@@ -73,7 +90,28 @@ authRoute.post(
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(201).json({ message: `jwt token created` });
+    res.status(201).json({ message: "guest-jwt token created" });
+  }
+);
+
+authRoute.post(
+  "/login/admin",
+  // passport.authenticate("admin-local", { session: false }),
+  (req: Request, res: Response) => {
+    const email = req.body.email;
+
+    const accessToken = jwt.sign({ email: email, role: "admin" }, jwtSecret, {
+      expiresIn: "1d",
+    });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      domain: "localhost",
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({ message: `admin-jwt token created` });
   }
 );
 

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const RegisterGuest = () => {
   return (
@@ -13,15 +14,15 @@ const RegisterGuest = () => {
               <div className="flex gap-3  ">
                 <div className="w-full">
                   <label
-                    htmlFor="email"
+                    htmlFor="firstName"
                     className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                   >
                     First name
                   </label>
                   <input
-                    type="email"
-                    name="email"
-                    id="email"
+                    type="text"
+                    name="firstName"
+                    id="firstName"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     placeholder="David"
                     // required=""
@@ -37,8 +38,8 @@ const RegisterGuest = () => {
                   </label>
                   <input
                     type="text"
-                    name="password"
-                    id="password"
+                    name="lastName"
+                    id="lastName"
                     placeholder="Jhones"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     // required=""
@@ -48,7 +49,7 @@ const RegisterGuest = () => {
               <div className="flex gap-3">
                 <div className="w-full">
                   <label
-                    htmlFor="confirm-password"
+                    htmlFor="email"
                     className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                   >
                     Email
@@ -56,7 +57,7 @@ const RegisterGuest = () => {
                   <input
                     type="email"
                     name="email"
-                    id="confirm-password"
+                    id="email"
                     placeholder="davidJhones@gmail.com"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     // required=""
@@ -64,15 +65,15 @@ const RegisterGuest = () => {
                 </div>
                 <div className="w-full">
                   <label
-                    htmlFor="confirm-password"
+                    htmlFor="password"
                     className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                   >
                     Password
                   </label>
                   <input
                     type="password"
-                    name="confirm-password"
-                    id="confirm-password"
+                    name="password"
+                    id="password"
                     placeholder="••••••••"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     // required=""
@@ -126,12 +127,13 @@ const RegisterGuest = () => {
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Already have an account?{" "}
-                <a
-                  href="#"
+                <Link
+                  href="/"
                   className="text-primary-600 dark:text-primary-500 font-medium hover:underline"
                 >
+                  {" "}
                   Login here
-                </a>
+                </Link>
               </p>
             </form>
           </div>

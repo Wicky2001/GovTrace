@@ -7,6 +7,7 @@ const loginPage = () => {
     <LoginForm
       formHeading="Guest Login"
       submitUrl="https://localhost:4000/api/auth/login/guest"
+      guest={true}
     />
   );
 };
