@@ -5,8 +5,40 @@ import Image from "next/image";
 import Link from "next/link";
 // import { FormEvent } from "react";
 import { FieldValues, useForm } from "react-hook-form";
+import { toast, Bounce } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const RegisterGuest = () => {
+  const router = useRouter();
+
+  const RegisterSuccessAlert = (message: string) => {
+    toast.success(`${message}`, {
+      position: "top-right",
+      autoClose: false,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+  };
+
+  const RegisterFaildAlert = (message: string) => {
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+  };
+
   const RegisterdGuest = z.object({
     firstName: z.string().min(5, "Too short!"),
     lastName: z.string().min(5),
@@ -32,8 +64,31 @@ const RegisterGuest = () => {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(RegisterdGuest) });
 
-  const onSubmit = (data: FieldValues) => {
-    console.log(data);
+  const onSubmit = async (data: FieldValues) => {
+    try {
+      const response = await fetch(
+        "https://localhost:4000/api/auth/register/guest",
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        RegisterSuccessAlert("Sucessfully registerd");
+        RegisterSuccessAlert("Now please login as guest");
+        router.push("/");
+      } else {
+        const data = await response.json();
+        RegisterFaildAlert("ERROR OCCURED DURING REGISTRATION");
+        RegisterFaildAlert(`${data?.message}`);
+      }
+    } catch (err) {
+      console.log(err);
+      RegisterFaildAlert("INTERNAL SERVER ERROR");
+      RegisterFaildAlert("Sorry for inconvinience");
+    }
   };
 
   return (

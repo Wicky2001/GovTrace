@@ -19,7 +19,7 @@ const LoginForm = ({ formHeading, submitUrl, guest }: LoginFormProps) => {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const loginFaildAlert = (message: string) =>
+  const loginFaildAlert = (message: string) => {
     toast.error(message, {
       position: "top-right",
       autoClose: 5000,
@@ -31,6 +31,7 @@ const LoginForm = ({ formHeading, submitUrl, guest }: LoginFormProps) => {
       theme: "dark",
       transition: Bounce,
     });
+  };
 
   const loginSuccessAlert = () => {
     toast.success("LOGGED IN", {

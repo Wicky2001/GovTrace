@@ -11,21 +11,25 @@ dotenv.config();
 const jwtSecret = String(process.env.SECRET);
 
 authRoute.post("/register/guest", async (req: Request, res: Response) => {
-  const data = req.body;
-
-  if (isGovermentEmail(data.email)) {
-    res
-      .status(401)
-      .json({ message: "YOU CAN'T USE GOVERMENT EMAIL TO REGISTER AS GUEST" });
-  }
-
-  const guest = await Guest.findOne({ email: data.email });
-  if (guest) {
-    res.status(400).json({ message: "You are already registerd please login" });
-  }
-
   try {
-    const guest = await saveGuest(data);
+    const data = req.body;
+
+    if (isGovermentEmail(data.email)) {
+      res
+        .status(401)
+        .json({
+          message: "YOU CAN'T USE GOVERMENT EMAIL TO REGISTER AS GUEST",
+        });
+    }
+
+    let guest = await Guest.findOne({ email: data.email });
+    if (guest) {
+      res
+        .status(400)
+        .json({ message: "You are already registerd please login" });
+    }
+
+    guest = await saveGuest(data);
     res.status(200).json({ message: `succssfully saved user ${guest}` });
   } catch (error) {
     if (error instanceof Error) {

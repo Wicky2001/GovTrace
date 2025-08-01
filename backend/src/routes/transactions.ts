@@ -18,6 +18,8 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const transactionRoute = Router();
+
+//ENABLED JWT PROTECTION
 transactionRoute.use(passport.authenticate("jwt", { session: false }));
 
 const block_forest_key = process.env.BLOCK_FOREST_API_KEY as string;

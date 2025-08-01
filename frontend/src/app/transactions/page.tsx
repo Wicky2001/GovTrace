@@ -100,18 +100,22 @@ export default function TransactionsPage() {
   ) => {
     setVerifyingStates((prev) => ({ ...prev, [transactionId]: "verifying" }));
     const url = `${
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000" //get all transactions
-    }/api/verify/${transactionId}`;
+      process.env.NEXT_PUBLIC_BASE_URL || "https://localhost:4000" //get all transactions
+    }/api/transaction/verify/${transactionId}`;
 
     console.log(url);
 
     try {
       // const response = await
       //   fetch(`/api/verify/${transactionHash}`);
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        cache: "no-cache",
+        credentials: "include",
+      });
       const result = await response.json();
+      const verifyStaus = result.verifyStatus;
 
-      if (response.ok && result === true) {
+      if (response.ok && verifyStaus === true) {
         setVerifyingStates((prev) => ({
           ...prev,
           [transactionId]: "verified",
