@@ -1,7 +1,41 @@
+"use client";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Link from "next/link";
+// import { FormEvent } from "react";
+import { FieldValues, useForm } from "react-hook-form";
 
 const RegisterGuest = () => {
+  const RegisterdGuest = z.object({
+    firstName: z.string().min(5, "Too short!"),
+    lastName: z.string().min(5),
+    email: z.email("Not a valid email!"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long") // Custom message for password length
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter") // Custom regex error
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter") // Custom regex error
+      .regex(/[0-9]/, "Password must contain at least one number") // Custom regex error
+      .regex(
+        /[^a-zA-Z0-9]/,
+        "Password must contain at least one special character"
+      ),
+    terms: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the terms and conditions",
+    }),
+  });
+  type FormData = z.infer<typeof RegisterdGuest>;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(RegisterdGuest) });
+
+  const onSubmit = (data: FieldValues) => {
+    console.log(data);
+  };
+
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto flex flex-col items-center justify-center px-6 py-8 md:h-screen lg:py-0">
@@ -10,7 +44,10 @@ const RegisterGuest = () => {
             <h1 className="text-xl leading-tight font-bold tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Hola! Please register.
             </h1>
-            <form className="space-y-4 md:space-y-6" action="#">
+            <form
+              className="space-y-4 md:space-y-3"
+              onSubmit={handleSubmit(onSubmit)}
+            >
               <div className="flex gap-3  ">
                 <div className="w-full">
                   <label
@@ -21,12 +58,16 @@ const RegisterGuest = () => {
                   </label>
                   <input
                     type="text"
-                    name="firstName"
+                    {...register("firstName")}
                     id="firstName"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     placeholder="David"
-                    // required=""
                   />
+                  {errors.firstName && (
+                    <p className=" pl-0.25 pt-0.5 w-full text-xs text-red-600 hover:text-sm">
+                      {errors.firstName.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="w-full">
@@ -38,12 +79,17 @@ const RegisterGuest = () => {
                   </label>
                   <input
                     type="text"
-                    name="lastName"
+                    {...register("lastName")}
                     id="lastName"
                     placeholder="Jhones"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     // required=""
                   />
+                  {errors.lastName && (
+                    <p className=" pl-0.25 pt-0.5 w-full text-xs text-red-600 hover:text-sm">
+                      {errors.lastName.message}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex gap-3">
@@ -56,12 +102,17 @@ const RegisterGuest = () => {
                   </label>
                   <input
                     type="email"
-                    name="email"
+                    {...register("email")}
                     id="email"
                     placeholder="davidJhones@gmail.com"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     // required=""
                   />
+                  {errors.email && (
+                    <p className=" pl-0.25 pt-0.5 w-full text-xs text-red-600 hover:text-sm">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 <div className="w-full">
                   <label
@@ -72,12 +123,17 @@ const RegisterGuest = () => {
                   </label>
                   <input
                     type="password"
-                    name="password"
+                    {...register("password")}
                     id="password"
                     placeholder="••••••••"
                     className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                     // required=""
                   />
+                  {errors.password && (
+                    <p className=" pl-0.25 pt-0.5 w-full text-xs text-red-600 hover:text-sm">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-start">
@@ -86,6 +142,7 @@ const RegisterGuest = () => {
                     id="terms"
                     aria-describedby="terms"
                     type="checkbox"
+                    {...register("terms")}
                     className="focus:ring-primary-300 dark:focus:ring-primary-600 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-3 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
                     // required=""
                   />
@@ -105,6 +162,11 @@ const RegisterGuest = () => {
                   </label>
                 </div>
               </div>
+              {errors.terms && (
+                <p className=" pl-0.25 mb-1 w-full text-xs text-red-600 hover:text-sm">
+                  {errors.terms.message}
+                </p>
+              )}
               <button
                 type="submit"
                 className="mb-2 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:outline-none"
