@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FieldValues, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 // Define the Transaction type
 interface Transaction {
@@ -37,6 +40,38 @@ const formatAmount = (amount: number) => {
 };
 
 export default function TransactionsPage() {
+  //store  transaction form functions start here
+
+  //   zodInstance.refine((value) => {
+  //   // Your custom validation logic goes here
+  //   // Return `true` if valid, `false` if invalid
+  // }, { message: 'Custom error message' });
+
+  const StoreTransaction = z.object({
+    department: z.string().min(1, "Please select a ministry"),
+    description: z
+      .string()
+      .min(10, "Description must have at least 10 characters"),
+    amount: z.string().min(1, "Amount is required"),
+    transaction_date: z.string().min(1, "Please select a type"),
+    // document: z.instanceof(File),
+  });
+
+  type StoreTransactionData = z.infer<typeof StoreTransaction>;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<StoreTransactionData>({
+    resolver: zodResolver(StoreTransaction),
+  });
+
+  const onSubmit = async (data: FieldValues) => {
+    console.log(data);
+  };
+  //Transaction store logic end here
+
   const router = useRouter();
 
   async function fetchTransactions() {
@@ -332,19 +367,23 @@ export default function TransactionsPage() {
             </div>
           </div>
         )}
-
+        {/* ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- */}
         {/* Add Transaction Tab */}
         {activeTab === "add" && (
           <div className="max-w-2xl">
             <h2 className="text-2xl font-semibold mb-6">Add New Transaction</h2>
-
-            <form className="space-y-8">
+            <form
+              className="space-y-8"
+              onSubmit={handleSubmit((data) => {
+                console.log(data);
+              })}
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-white">
-                    Ministry/Department
+                    Department
                   </label>
-                  <Select>
+                  {/* <Select>
                     <SelectTrigger className="h-12 w-full bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-violet-400">
                       <SelectValue placeholder="Select Ministry" />
                     </SelectTrigger>
@@ -353,28 +392,68 @@ export default function TransactionsPage() {
                         value="health"
                         className="text-white hover:bg-gray-800"
                       >
-                        Ministry of Health
+                        Department of Health
                       </SelectItem>
                       <SelectItem
                         value="education"
                         className="text-white hover:bg-gray-800"
                       >
-                        Ministry of Education
+                        Department of Education
                       </SelectItem>
                       <SelectItem
                         value="transport"
                         className="text-white hover:bg-gray-800"
                       >
-                        Ministry of Transportation
+                        Department of Transportation
                       </SelectItem>
                       <SelectItem
                         value="defense"
                         className="text-white hover:bg-gray-800"
                       >
-                        Ministry of Defense
+                        Department of Defense
                       </SelectItem>
                     </SelectContent>
-                  </Select>
+                    <input {...register("department")} type="hidden" />
+                  </Select> */}
+
+                  <select
+                    {...register("department")}
+                    className="h-12 w-full  bg-black/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-gray-300 focus:bg-gray-700"
+                  >
+                    <option value="" disabled className="text-white bg-black">
+                      Select Ministry
+                    </option>
+                    <option
+                      value="health"
+                      className="text-white bg-black hover:bg-gray-700"
+                    >
+                      Department of Health
+                    </option>
+                    <option
+                      value="education"
+                      className="text-white bg-black  hover:bg-gray-700"
+                    >
+                      Department of Education
+                    </option>
+                    <option
+                      value="transport"
+                      className="text-white bg-black  hover:bg-gray-700"
+                    >
+                      Department of Transportation
+                    </option>
+                    <option
+                      value="defense"
+                      className="text-white bg-black  hover:bg-gray-700"
+                    >
+                      Department of Defense
+                    </option>
+                  </select>
+
+                  {errors.department && (
+                    <p className="text-xs text-red-500">
+                      {errors.department.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -384,8 +463,34 @@ export default function TransactionsPage() {
                   <input
                     type="text"
                     placeholder="Rs. 0.00"
+                    {...register("amount", { required: "Amount is required" })}
                     className="py-2 w-full px-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-violet-400"
                   />
+                  {errors.amount && (
+                    <p className="text-xs text-red-500">
+                      {errors.amount.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-white">
+                    Transaction Date
+                  </label>
+                  <input
+                    type="date"
+                    {...register("transaction_date", {
+                      required: "Please select a date",
+                    })}
+                    className="py-2 w-full px-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-violet-400"
+                  />
+                  {errors.transaction_date && (
+                    <p className="text-xs text-red-500">
+                      {errors.transaction_date.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -394,86 +499,18 @@ export default function TransactionsPage() {
                   Transaction Description
                 </label>
                 <textarea
+                  {...register("description", {
+                    required: "Description is required",
+                  })}
                   rows={4}
                   placeholder="Enter detailed description of the transaction..."
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-violet-400 resize-none"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-white">
-                    Transaction Type
-                  </label>
-                  <Select>
-                    <SelectTrigger className="h-12 w-full bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-violet-400">
-                      <SelectValue placeholder="Select Type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white/10 border-white/10 backdrop-blur-2xl">
-                      <SelectItem
-                        value="procurement"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Procurement
-                      </SelectItem>
-                      <SelectItem
-                        value="salary"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Salary Payment
-                      </SelectItem>
-                      <SelectItem
-                        value="infrastructure"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Infrastructure
-                      </SelectItem>
-                      <SelectItem
-                        value="welfare"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Social Welfare
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* <div className="space-y-2">
-                  <label className="block text-sm font-medium text-white">
-                    Priority Level
-                  </label>
-                  <Select>
-                    <SelectTrigger className="h-12 w-full bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-violet-400">
-                      <SelectValue placeholder="Select Priority" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white/10 border-white/10 backdrop-blur-2xl">
-                      <SelectItem
-                        value="low"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Low
-                      </SelectItem>
-                      <SelectItem
-                        value="medium"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Medium
-                      </SelectItem>
-                      <SelectItem
-                        value="high"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        High
-                      </SelectItem>
-                      <SelectItem
-                        value="urgent"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Urgent
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div> */}
+                {errors.description && (
+                  <p className="text-xs text-red-500">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -481,48 +518,41 @@ export default function TransactionsPage() {
                   Supporting Documents
                 </label>
                 <div className="border-2 border-dashed border-gray-500/30 rounded-lg p-8 text-center bg-gray-800/20 relative">
-                  <div className="absolute top-3 right-3">
-                    <span className="bg-orange-500/20 text-orange-400 text-xs px-3 py-1 rounded-full font-medium">
-                      Coming Soon
-                    </span>
-                  </div>
-                  <div className="text-gray-500 mb-3 opacity-50">
-                    <svg
-                      className="w-10 h-10 mx-auto mb-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  <div className="flex flex-col items-center justify-center text-gray-500 mb-3 opacity-50">
+                    <div className="w-full">
+                      <svg
+                        className="w-10 h-10 mx-auto mb-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+
+                    <div className="w-full">
+                      <input
+                        type="file"
+                        // {...register("document")}
+                        className="pl-20 cursor-pointer"
                       />
-                    </svg>
-                    <span className="text-base font-medium">
-                      Document upload feature
-                    </span>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500 opacity-50">
-                    This feature will be available in future updates
-                  </p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  variant="default"
+                <button
+                  type="submit"
                   className="h-12 flex-1 bg-violet-600 hover:bg-violet-700 text-white cursor-pointer font-medium"
                 >
                   Submit Transaction
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-12 flex-1 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white cursor-pointer font-medium"
-                >
-                  Save as Draft
-                </Button>
+                </button>
               </div>
             </form>
           </div>
