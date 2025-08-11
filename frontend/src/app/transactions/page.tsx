@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams
 import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -10,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { SuccessAlert, FaildAlert } from "@/service/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FieldValues, useForm } from "react-hook-form";
@@ -42,22 +45,29 @@ const formatAmount = (amount: number) => {
 export default function TransactionsPage() {
   //store  transaction form functions start here
 
-  //   zodInstance.refine((value) => {
-  //   // Your custom validation logic goes here
-  //   // Return `true` if valid, `false` if invalid
-  // }, { message: 'Custom error message' });
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const StoreTransaction = z.object({
     department: z.string().min(1, "Please select a ministry"),
     description: z
       .string()
       .min(10, "Description must have at least 10 characters"),
-    amount: z.string().min(1, "Amount is required"),
+    amount: z.string().refine(
+      (value) => {
+        // Check if the value contains only valid numeric characters
+        return /^[0-9]+(\.[0-9]+)?$/.test(value.trim());
+      },
+      {
+        message:
+          "Please enter a valid amount (only numbers and decimal point allowed)",
+      }
+    ),
     transaction_date: z.string().min(1, "Please select a type"),
     // document: z.instanceof(File),
   });
 
   type StoreTransactionData = z.infer<typeof StoreTransaction>;
+  // const [selectedFile, setSelectedFile] = useState(null);
 
   const {
     register,
@@ -69,6 +79,25 @@ export default function TransactionsPage() {
 
   const onSubmit = async (data: FieldValues) => {
     console.log(data);
+
+    // if (fileRef.current) {
+    //   console.log(`file ref ${fileRef.current.files[0].type}`);
+    // }
+    const supportDocument = fileRef.current.files[0];
+
+    if (supportDocument === undefined) {
+      console.log("No file is selected");
+      FaildAlert("Please provide supporting document");
+    } else {
+      console.log("file is selected");
+      console.log(supportDocument.type);
+      if (supportDocument.type !== "application/pdf") {
+        FaildAlert("please provide PDF for suppporting document");
+      }
+
+      data = { ...data, supportDocument: supportDocument };
+      console.log(data);
+    }
   };
   //Transaction store logic end here
 
@@ -76,8 +105,6 @@ export default function TransactionsPage() {
 
   async function fetchTransactions() {
     const url = `https://localhost:4000/api/transaction/all`;
-
-    console.log(url);
 
     try {
       const response = await fetch(url, {
@@ -87,7 +114,8 @@ export default function TransactionsPage() {
 
       // console.log(response);
       if (response.status === 401) {
-        // router.push("/login/guest");
+        router.push("/login/guest");
+
         throw new Error("Not authenticated");
       }
 
@@ -368,53 +396,23 @@ export default function TransactionsPage() {
           </div>
         )}
         {/* ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- */}
-        {/* Add Transaction Tab */}
+
         {activeTab === "add" && (
           <div className="max-w-2xl">
             <h2 className="text-2xl font-semibold mb-6">Add New Transaction</h2>
             <form
               className="space-y-8"
-              onSubmit={handleSubmit((data) => {
-                console.log(data);
-              })}
+              // onSubmit={handleSubmit((data) => {
+              //   console.log(data);
+              // })}
+
+              onSubmit={handleSubmit(onSubmit)}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-white">
                     Department
                   </label>
-                  {/* <Select>
-                    <SelectTrigger className="h-12 w-full bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-violet-400">
-                      <SelectValue placeholder="Select Ministry" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white/10 border-white/10 backdrop-blur-2xl">
-                      <SelectItem
-                        value="health"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Department of Health
-                      </SelectItem>
-                      <SelectItem
-                        value="education"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Department of Education
-                      </SelectItem>
-                      <SelectItem
-                        value="transport"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Department of Transportation
-                      </SelectItem>
-                      <SelectItem
-                        value="defense"
-                        className="text-white hover:bg-gray-800"
-                      >
-                        Department of Defense
-                      </SelectItem>
-                    </SelectContent>
-                    <input {...register("department")} type="hidden" />
-                  </Select> */}
 
                   <select
                     {...register("department")}
@@ -538,7 +536,9 @@ export default function TransactionsPage() {
                     <div className="w-full">
                       <input
                         type="file"
-                        // {...register("document")}
+                        name="upLoadFile"
+                        accept="application/pdf"
+                        ref={fileRef}
                         className="pl-20 cursor-pointer"
                       />
                     </div>

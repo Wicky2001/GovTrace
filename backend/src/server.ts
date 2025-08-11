@@ -21,16 +21,18 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
-
+const port = 4000;
 const options = {
   key: fs.readFileSync("./httpsFiles/localhost-key.pem"),
   cert: fs.readFileSync("./httpsFiles/localhost.pem"),
 };
 
+https.createServer(options, app).listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
 app.use("/api/transaction", transactionRoute);
 app.use("/api/auth", authRoute);
-
-const port = 4000;
 
 connectToDatabase();
 
@@ -41,7 +43,3 @@ app.get(
     res.status(200).json({ message: "server is up" });
   }
 );
-
-https.createServer(options, app).listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});

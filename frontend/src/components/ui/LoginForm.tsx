@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { toast, Bounce } from "react-toastify";
+import { SuccessAlert, FaildAlert } from "@/service/alert";
 
 interface LoginFormProps {
   formHeading: string;
@@ -19,34 +19,6 @@ const LoginForm = ({ formHeading, submitUrl, guest }: LoginFormProps) => {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const loginFaildAlert = (message: string) => {
-    toast.error(message, {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Bounce,
-    });
-  };
-
-  const loginSuccessAlert = () => {
-    toast.success("LOGGED IN", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Bounce,
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!guest) {
@@ -62,9 +34,9 @@ const LoginForm = ({ formHeading, submitUrl, guest }: LoginFormProps) => {
 
       const responseData = (await res.json()) as ApiResponse;
       if (!res.ok) {
-        loginFaildAlert(`${responseData.message}`);
+        FaildAlert(`${responseData.message}`);
       } else {
-        loginSuccessAlert();
+        SuccessAlert("LOGGED IN");
         router.push("/transactions");
       }
     } catch (error) {
