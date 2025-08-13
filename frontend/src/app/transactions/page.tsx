@@ -4,14 +4,6 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import { SuccessAlert, FaildAlert } from "@/service/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -73,30 +65,73 @@ export default function TransactionsPage() {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<StoreTransactionData>({
     resolver: zodResolver(StoreTransaction),
   });
 
   const onSubmit = async (data: FieldValues) => {
-    console.log(data);
+    // console.log(data);
 
-    // if (fileRef.current) {
-    //   console.log(`file ref ${fileRef.current.files[0].type}`);
-    // }
-    const supportDocument = fileRef.current.files[0];
+    // // if (fileRef.current) {
+    // //   console.log(`file ref ${fileRef.current.files[0].type}`);
+    // // }
 
-    if (supportDocument === undefined) {
-      console.log("No file is selected");
-      FaildAlert("Please provide supporting document");
-    } else {
-      console.log("file is selected");
-      console.log(supportDocument.type);
-      if (supportDocument.type !== "application/pdf") {
-        FaildAlert("please provide PDF for suppporting document");
+    try {
+      const supportDocument = fileRef.current.files[0];
+
+      if (supportDocument === undefined) {
+        console.log("No file is selected");
+        FaildAlert("Please provide supporting document");
+      } else {
+        console.log("file is selected");
+        console.log(supportDocument.type);
+        if (supportDocument.type !== "application/pdf") {
+          FaildAlert("please provide PDF for suppporting document");
+        }
+
+        data = { ...data, supportDocument: supportDocument };
+        console.log(data);
+
+        const formData = new FormData();
+        formData.append("amount", data.amount);
+        formData.append("description", data.description);
+        formData.append("department", data.department);
+        formData.append("transaction_date", data.transaction_date);
+        formData.append("document", data.supportDocument);
+
+        const response = await fetch(
+          "https://localhost:4000/api/transaction/store",
+          {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+          }
+        );
+
+        if (response.status === 401) {
+          FaildAlert("You are not authenticated");
+          FaildAlert("Please login");
+          router.push("/login/guest");
+          return;
+        }
+
+        if (!response.ok) {
+          console.log("submission faild");
+          FaildAlert("Error occured. Please try again later");
+          return;
+        }
+
+        SuccessAlert("Transaction successfully stored on block chain");
+        SuccessAlert("Please click refresh to see transaction");
+        reset();
+        router.push("transactions?tab=track");
+        return;
       }
-
-      data = { ...data, supportDocument: supportDocument };
-      console.log(data);
+    } catch (error) {
+      console.error("Error occurred while submitting:", error);
+      FaildAlert("An unexpected error occurred. Please try again later");
+      reset(); // Reset form on error
     }
   };
   //Transaction store logic end here
@@ -323,6 +358,7 @@ export default function TransactionsPage() {
                   <Button
                     variant="default"
                     className="bg-violet-600 hover:bg-violet-700 whitespace-nowrap cursor-pointer"
+                    onClick={() => window.location.reload()}
                   >
                     Refresh
                   </Button>
