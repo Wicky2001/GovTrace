@@ -117,8 +117,8 @@ async function verifyTransaction(document: DataToGenerateHash, txHash: string) {
 
   const hashGeneratedUsingDb = await getHashForData(document);
 
-  console.log("hash on chain = " + hashOnchain);
-  console.log("hash using data = " + hashGeneratedUsingDb);
+  // console.log("hash on chain = " + hashOnchain);
+  // console.log("hash using data = " + hashGeneratedUsingDb);
 
   return hashOnchain === hashGeneratedUsingDb;
 }

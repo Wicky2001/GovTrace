@@ -39,14 +39,16 @@ interface guestData extends Document {
   email: string;
   password: string;
   role?: string;
+  googleId?: string;
 }
 
 const guestSchema = new mongoose.Schema<guestData>({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  firstName: { type: String, required: false },
+  lastName: { type: String, required: false },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, required: false },
+  googleId: { type: String, required: false },
 });
 
 guestSchema.pre<guestData>("save", async function (next) {

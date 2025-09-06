@@ -3,7 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import { connectToDatabase } from "./utills/db.js";
 import passport from "./utills/passport.js";
-//Routes
+
 import transactionRoute from "./routes/transactions.js";
 import authRoute from "./routes/auth.js";
 import cookieParser from "cookie-parser";
@@ -15,8 +15,8 @@ const app = express();
 app.use(morgan("dev"));
 app.use(
   cors({
-    origin: "https://localhost:3000", // Your frontend's URL
-    credentials: true, // Allow cookies to be sent with requests
+    origin: "https://localhost:3000",
+    credentials: true,
   })
 );
 app.use(express.json());
@@ -31,8 +31,8 @@ https.createServer(options, app).listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
 
-app.use("/api/transaction", transactionRoute);
 app.use("/api/auth", authRoute);
+app.use("/api/transaction", transactionRoute);
 
 connectToDatabase();
 

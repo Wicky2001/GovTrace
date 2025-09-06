@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import { isGovermentEmail } from "../utills/support.js";
 import { saveGuest, Guest } from "../utills/db.js";
 import passport from "../utills/passport.js";
@@ -15,11 +15,9 @@ authRoute.post("/register/guest", async (req: Request, res: Response) => {
     const data = req.body;
 
     if (isGovermentEmail(data.email)) {
-      res
-        .status(401)
-        .json({
-          message: "YOU CAN'T USE GOVERMENT EMAIL TO REGISTER AS GUEST",
-        });
+      res.status(401).json({
+        message: "YOU CAN'T USE GOVERMENT EMAIL TO REGISTER AS GUEST",
+      });
     }
 
     let guest = await Guest.findOne({ email: data.email });
@@ -37,31 +35,6 @@ authRoute.post("/register/guest", async (req: Request, res: Response) => {
     }
   }
 });
-
-// authRoute.post(
-//   "/login/guest",
-//   passport.authenticate("guest-local", {
-//     session: false,
-//     failureMessage: true,
-//   }),
-//   (req: Request, res: Response) => {
-//     const email = req.body.email;
-
-//     const accessToken = jwt.sign({ email: email, role: "guest" }, jwtSecret, {
-//       expiresIn: "1d",
-//     });
-
-//     res.cookie("accessToken", accessToken, {
-//       httpOnly: true,
-//       domain: "localhost",
-//       secure: true,
-//       sameSite: "none",
-//       maxAge: 24 * 60 * 60 * 1000,
-//     });
-
-//     res.status(201).json({ message: `guest-jwt token created` });
-//   }
-// );
 
 authRoute.post(
   "/login/guest",
@@ -132,6 +105,36 @@ authRoute.post(
     });
 
     res.status(201).json({ message: `admin-jwt token created` });
+  }
+);
+
+authRoute.get(
+  "/google",
+  passport.authenticate("google", { scope: ["email", "profile"] })
+);
+
+authRoute.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req: any, res: any) => {
+    const user = req.user;
+    const token = jwt.sign(
+      {
+        googleId: user.googleId,
+        role: "guest",
+      },
+      jwtSecret,
+      { expiresIn: "1d" }
+    );
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.redirect("https://localhost:3000/transactions");
   }
 );
 

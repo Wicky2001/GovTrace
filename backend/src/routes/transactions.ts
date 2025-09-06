@@ -63,11 +63,11 @@ transactionRoute.post(
       fileName: data?.fileName,
     };
 
-    console.log(
-      `DATA TO HASH WHEN SUBMITTING THE REQUEST= ${JSON.stringify(
-        dataToGenerateHash
-      )}`
-    );
+    // console.log(
+    //   `DATA TO HASH WHEN SUBMITTING THE REQUEST= ${JSON.stringify(
+    //     dataToGenerateHash
+    //   )}`
+    // );
 
     const dataHash = await getHashForData(dataToGenerateHash);
 
@@ -84,7 +84,7 @@ transactionRoute.post(
 
     storeTransactionDetailsOnChain(transaction, wallet)
       .then((blockchainHash) => {
-        console.log(`Transaction hash ${blockchainHash}`);
+        // console.log(`Transaction hash ${blockchainHash}`);
 
         const transaction_mint_date = new Date();
 
@@ -117,12 +117,12 @@ transactionRoute.post(
 transactionRoute.get("/verify/:txhash", async (req: Request, res: Response) => {
   const txhash = req.params.txhash;
 
-  console.log(txhash);
+  // console.log(txhash);
 
   try {
     const document = await getDocumentUsingTxHash(txhash);
 
-    console.log(`Document ${document}`);
+    // console.log(`Document ${document}`);
 
     const dataToGenerateHash = {
       amount: document?.amount,
@@ -132,7 +132,7 @@ transactionRoute.get("/verify/:txhash", async (req: Request, res: Response) => {
       fileName: document?.fileName,
     };
 
-    console.log(`DATA FOR HASH WHEN VERIFYING HASH = ${dataToGenerateHash}`);
+    // console.log(`DATA FOR HASH WHEN VERIFYING HASH = ${dataToGenerateHash}`);
 
     const verifyStatus = await verifyTransaction(dataToGenerateHash, txhash);
 
@@ -148,7 +148,7 @@ transactionRoute.get("/verify/:txhash", async (req: Request, res: Response) => {
       });
     }
 
-    console.log(verifyStatus);
+    // console.log(verifyStatus);
   } catch (error) {
     console.log(
       `ERROR OCUURED WHEN FETCHING DOCUMENT FROM DATABASE USING TXHASH ${error} `
