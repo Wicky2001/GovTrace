@@ -78,6 +78,7 @@ export default function TransactionsPage() {
     // // }
 
     try {
+      // @ts-expect-error: Temporarily ignoring the error because the currentfile will not be null
       const supportDocument = fileRef.current.files[0];
 
       if (supportDocument === undefined) {

@@ -91,6 +91,10 @@ const RegisterGuest = () => {
     }
   };
 
+  const loginWithGoogle = () => {
+    window.location.href = "https://localhost:4000/api/auth/google";
+  };
+
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto flex flex-col items-center justify-center px-6 py-8 md:h-screen lg:py-0">
@@ -232,6 +236,7 @@ const RegisterGuest = () => {
               <button
                 type="submit"
                 className="flex gap-1 inline-center justify-center focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:outline-none"
+                onClick={loginWithGoogle}
               >
                 <Image
                   src="https://www.svgrepo.com/show/475656/google-color.svg"
